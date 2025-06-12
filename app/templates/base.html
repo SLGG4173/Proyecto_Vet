@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    {% if title %}
+    <title>Veterinaria - {{ title }}</title>
+    {% else %}
+    <title>Veterinaria</title>
+    {% endif %}
+    <!-- Bootstrap CSS via CDN -->
+    <link rel="stylesheet" href="https://bootswatch.com/5/morph/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4" data-bs-theme="dark">
+        {# Enlace a la página principal de la aplicación #}
+        <a class="navbar-brand" href="{{ url_for('routes.index') }}">Veterinaria</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                {# Usamos current_user de Flask-Login para determinar si el usuario está autenticado #}
+                {% if current_user.is_authenticated %}
+                <li class="nav-item">
+                    {# Enlace a la lista de mascotas (usando el nombre de endpoint correcto) #}
+                    <a class="nav-link" href="{{ url_for('routes.list_mascotas') }}">Mis Mascotas</a>
+                </li>
+                 <li class="nav-item">
+                    {# Enlace a la lista de consultas (usando el nombre de endpoint correcto) #}
+                    <a class="nav-link" href="{{ url_for('routes.list_consultas') }}">Mis Consultas</a>
+                </li>
+                <li class="nav-item">
+                    {# Mostrar nombre del Dueño logueado usando los atributos correctos #}
+                    <a class="nav-link" href="{{ url_for('routes.logout') }}">Cerrar Sesión ({{ current_user.nombre_dueno }})</a>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    {# Enlace a la página de login #}
+                    <a class="nav-link" href="{{ url_for('routes.login') }}">Ingresar</a>
+                </li>
+                 <li class="nav-item">
+                    {# Enlace a la página de registro #}
+                    <a class="nav-link" href="{{ url_for('routes.register') }}">Registrarse</a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        {# Renderizar mensajes flash. categories 'success', 'info', 'warning', 'danger' para Bootstrap #}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {# Bloque donde se inyectará el contenido de las plantillas que extienden base.html #}
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <!-- Optional JavaScript for Bootstrap -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

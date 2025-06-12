@@ -1,0 +1,37 @@
+{% extends "staff_base.html" %} {# Heredamos de la base de staff #}
+{% block content %}
+<div class="row justify-content-md-center">
+    <div class="col-md-6 col-lg-4">
+        <h1 class="mb-4 text-center">Ingreso de Personal</h1>
+        <form action="" method="post" novalidate>
+            {{ form.hidden_tag() }} {# CSRF #}
+
+            {# Campo Nombre de Usuario #}
+            <div class="form-group">
+                {{ form.username.label }}<br>
+                {{ form.username(size=32, class='form-control', placeholder='Nombre de Usuario') }}
+                {% for error in form.username.errors %}
+                <span class="text-danger small">[{{ error }}]</span>
+                {% endfor %}
+            </div>
+
+            {# Campo Contraseña #}
+            <div class="form-group">
+                {{ form.password.label }}<br>
+                {{ form.password(size=32, class='form-control', placeholder='Contraseña') }}
+                {% for error in form.password.errors %}
+                <span class="text-danger small">[{{ error }}]</span>
+                {% endfor %}
+            </div>
+
+             {# Botón de Submit #}
+            <div class="form-group">
+                {{ form.submit(class='btn btn-primary btn-block mt-3') }}
+            </div>
+        </form>
+         {# No hay enlace de registro para staff aquí #}
+         {# Opcional: Enlace de vuelta a la página pública #}
+         <p class="text-center mt-3"><a href="{{ url_for('routes.index') }}">Ir a la página pública</a>.</p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,196 @@
+{% extends "staff_base.html" %} {# Heredamos de la base de staff #}
+{% block content %}
+{# Título (será "Añadir Veterinario" o "Editar Veterinario" desde la ruta) #}
+<h1 class="mb-4 text-center">{{ title }}</h1>
+
+<div class="row justify-content-md-center">
+    <div class="col-md-8">
+        {# El formulario POSTeará a la ruta de añadir o editar según si is_edit es True #}
+        {# La acción URL_FOR cambia dinamicamente basado en la variable is_edit pasada de la ruta #}
+        <form action="{{ url_for('routes.staff_add_veterinario') if not is_edit else url_for('routes.staff_edit_veterinario', vet_id=veterinario.id) }}" method="post" novalidate>
+            {{ form.hidden_tag() }} {# CSRF #}
+             {# Opcional: campo oculto para el ID del veterinario si estás editando #}
+             {% if is_edit and veterinario %}
+                 <input type="hidden" name="vet_id" value="{{ veterinario.id }}">
+             {% endif %}
+
+
+            {# --- Seccion Campos de Perfil de Veterinario --- #}
+            <h4 class="mb-3">Información del Perfil</h4>
+
+            {# Campo Nombre #}
+            <div class="form-group">
+                {{ form.nombre_veterinario.label(class='form-label') }}
+                {{ form.nombre_veterinario(class='form-control') }}
+                 {% for error in form.nombre_veterinario.errors %}
+                <div class="text-danger small">[{{ error }}]</div>
+                {% endfor %}
+            </div>
+
+            {# Campo Apellido #}
+            <div class="form-group">
+                {{ form.apellido_veterinario.label(class='form-label') }}
+                {{ form.apellido_veterinario(class='form-control') }}
+                 {% for error in form.apellido_veterinario.errors %}
+                <div class="text-danger small">[{{ error }}]</div>
+                {% endfor %}
+            </div>
+
+            {# Campo Teléfono #}
+            <div class="form-group">
+                {{ form.telefono_veterinario.label(class='form-label') }}
+                {{ form.telefono_veterinario(class='form-control', placeholder='(Opcional)') }}
+                 {% for error in form.telefono_veterinario.errors %}
+                <div class="text-danger small">[{{ error }}]</div>
+                {% endfor %}
+            </div>
+
+            {# Campo Email #}
+            <div class="form-group">
+                {{ form.email_veterinario.label(class='form-label') }}
+                {{ form.email_veterinario(class='form-control', placeholder='(Opcional)') }}
+                 {% for error in form.email_veterinario.errors %}
+                <div class="text-danger small">[{{ error }}]</div>
+                {% endfor %}
+            </div>
+
+            {# Campo Licencia #}
+            <div class="form-group">
+                {{ form.licencia_veterinario.label(class='form-label') }}
+                {{ form.licencia_veterinario(class='form-control', placeholder='(Opcional/Única)') }}
+                 {% for error in form.licencia_veterinario.errors %}
+                <div class="text-danger small">[{{ error }}]</div>
+                {% endfor %}
+            </div>
+
+             {# Campo Fecha de Contratación #}
+            <div class="form-group">
+                {{ form.fecha_contratacion.label(class='form-label') }} (YYYY-MM-DD)
+                {{ form.fecha_contratacion(class='form-control', type='date') }}
+                 {% for error in form.fecha_contratacion.errors %}
+                <div class="text-danger small">[{{ error }}]</div>
+                {% endfor %}
+            </div>
+
+            {# --- Seccion Campos de Cuenta de Usuario Staff (Solo visible/editable si el Staff logueado es Admin) --- #}
+            {# Esto asegura que solo el Admin puede vincular/editar la cuenta Staff #}
+             {% if g.staff_user and (g.staff_user.rol == 'admin') %}
+                <hr class="my-4">
+                <h4 class="mb-3">Configurar Cuenta de Usuario Staff</h4>
+
+                {# Checkbox para Crear/Vincular Cuenta #}
+                 {# Si estamos editando y YA EXISTE una cuenta vinculada, el checkbox está chequeado y no puede deschequearse si requiere cuenta #}
+                {% set has_associated_user = is_edit and veterinario and veterinario.user_account %}
+                {# Podemos deshabilitar el checkbox si ya hay cuenta asociada y no queremos permitir desvincular facilmente #}
+                {# <div class="form-group form-check">
+                    {{ form.create_user_account(class='form-check-input', disabled=(true if has_associated_user else false)) }}
+                    {{ form.create_user_account.label(class='form-check-label') }}
+                </div> #}
+                {# O lo hacemos mas simple: Siempre permitir chequear para CREAR, si ya existe solo editar. #}
+                {# Mostrar checkbox solo si NO HAY cuenta asociada aún O si implementamos desvinculación via deschequear #}
+                 <div class="form-group form-check">
+                    {# En modo edición, si ya tiene cuenta, mostramos solo que la tiene y el enlace para editarla/cambiar password separadamente #}
+                     {% if has_associated_user %}
+                          <p><strong>Cuenta Staff Asociada:</strong> {{ veterinario.user_account.username }}
+                             <span class="badge badge-{{ 'success' if veterinario.user_account.is_active else 'danger' }}">
+                                 {{ 'Activa' if veterinario.user_account.is_active else 'Inactiva' }}
+                            </span>
+                         </p>
+                         {# Enlace para cambiar password de la cuenta asociada (RUTA NO IMPLEMENTADA) #}
+                         {# <a href="{{ url_for('routes.staff_change_password', user_id=veterinario.user_account.id) }}" class="btn btn-link btn-sm">Cambiar Contraseña</a> #}
+                         {# Enlace para Deshabilitar/Desvincular cuenta (Manejado en la ruta delete O un botón aquí) #}
+                         {# Si deshabilitamos en delete, podemos simplemente mostrar estado aqui. #}
+
+                          {# Mostramos checkbox SOLO si ya hay cuenta? O solo si NO hay? Vamos a mostrar solo si NO hay. #}
+                         {# Si ya hay, los campos username/password no aplican a editar. #}
+
+                          <p class="text-info">Edite los detalles del perfil arriba. Para gestionar la cuenta Staff asociada ({{ veterinario.user_account.username }}), considere una sección separada de gestión de usuarios Staff.</p>
+
+                     {% else %} {# Si NO HAY cuenta asociada, mostrar checkbox para CREAR una nueva #}
+                          {# La validación condicional en VeterinarioFormStaff checará si username/pass están llenos si esta checkbox se envía como True #}
+                         <div class="form-group form-check">
+                             {{ form.create_user_account(class='form-check-input') }}
+                             {{ form.create_user_account.label(class='form-check-label') }}
+                         </div>
+
+                          {# Campos de Usuario: solo relevantes al CREAR UNA CUENTA ASOCIADA #}
+                          {# Estos campos solo se requieren y validan si create_user_account está true #}
+                         <div id="user_account_fields"> {# Usar JS o CSS para mostrar/ocultar basado en el checkbox #}
+                             <div class="form-group">
+                                 {{ form.username.label(class='form-label') }}
+                                 {{ form.username(class='form-control') }}
+                                  {% for error in form.username.errors %}
+                                 <div class="text-danger small">[{{ error }}]</div>
+                                 {% endfor %}
+                             </div>
+                              <div class="form-group">
+                                 {{ form.user_password.label(class='form-label') }}
+                                 {{ form.user_password(class='form-control') }}
+                                  {% for error in form.user_password.errors %}
+                                 <div class="text-danger small">[{{ error }}]</div>
+                                 {% endfor %}
+                             </div>
+                              <div class="form-group">
+                                 {{ form.user_password2.label(class='form-label') }}
+                                 {{ form.user_password2(class='form-control') }}
+                                  {% for error in form.user_password2.errors %}
+                                 <div class="text-danger small">[{{ error }}]</div>
+                                 {% endfor %}
+                             </div>
+                             <div class="form-group form-check">
+                                 {{ form.is_active(class='form-check-input') }}
+                                 {{ form.is_active.label(class='form-check-label') }}
+                            </div>
+
+                         </div> {# Fin user_account_fields #}
+                      {% endif %} {# Fin has_associated_user check #}
+
+
+             {% else %} {# Si el Staff logueado NO es Admin #}
+                <hr class="my-4">
+                <h4 class="mb-3 text-muted">Configuración de Cuenta de Usuario Staff (Solo Admin)</h4>
+                <p>Solo un Administrador puede gestionar la cuenta de Staff asociada a este perfil.</p>
+                 {# Mostrar info de cuenta si existe para no admins #}
+                 {% set associated_user_non_admin = is_edit and veterinario and veterinario.user_account %}
+                 {% if associated_user_non_admin %}
+                     <p><strong>Cuenta Staff Asociada:</strong> {{ veterinario.user_account.username }}
+                        <span class="badge badge-{{ 'success' if veterinario.user_account.is_active else 'danger' }}">
+                             {{ 'Activa' if veterinario.user_account.is_active else 'Inactiva' }}
+                        </span>
+                     </p>
+                 {% endif %}
+             {% endif %} {# Fin Admin check para campos de usuario #}
+
+
+            {# Botón de Submit #}
+            <div class="form-group text-center mt-4">
+                {{ form.submit(class='btn btn-primary mr-2') }}
+                {# Enlace para cancelar #}
+                <a href="{{ url_for('routes.staff_list_veterinarios') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+
+        </form>
+
+        {# Puedes añadir JS para mostrar/ocultar los campos de usuario #}
+        {# <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const checkbox = document.getElementById('create_user_account'); // Usa el ID real del checkbox
+                const userFieldsDiv = document.getElementById('user_account_fields');
+
+                function toggleUserFields() {
+                    if (checkbox.checked) {
+                        userFieldsDiv.style.display = 'block';
+                    } else {
+                        userFieldsDiv.style.display = 'none';
+                    }
+                }
+
+                // Ejecutar en la carga y al cambiar el checkbox
+                toggleUserFields();
+                checkbox.addEventListener('change', toggleUserFields);
+            });
+           </script> #}
+
+    </div>
+</div>
+{% endblock %}

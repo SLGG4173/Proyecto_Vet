@@ -1,0 +1,47 @@
+<!-- app/templates/reporte_consultas_veterinario.html -->
+{% extends "staff_base.html" %}
+{% block content %}
+<h1>{{ title }}</h1>
+
+<!-- Formulario de Filtros -->
+<div class="card my-4">
+    <div class="card-body">
+        <form method="POST" class="form-inline">
+            {{ form.hidden_tag() }}
+            <div class="form-group mr-3">
+                {{ form.mes_anio.label(class="mr-2") }}
+                {{ form.mes_anio(class="form-control") }}
+            </div>
+            {{ form.submit(class="btn btn-primary") }}
+        </form>
+    </div>
+</div>
+
+<!-- Resultados del Reporte -->
+{% if report_data %}
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>Veterinario</th>
+            <th class="text-center">Total de Consultas Atendidas</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for nombre, apellido, total in report_data %}
+        <tr>
+            <td>Dr. {{ nombre }} {{ apellido }}</td>
+            <td class="text-center">{{ total }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<!-- BOTÓN DE EXPORTACIÓN -->
+    <a href="{{ url_for('routes.exportar_reporte_consultas_veterinario', mes_anio=form.mes_anio.data.strftime('%Y-%m') if form.mes_anio.data else '') }}" 
+       class="btn btn-success mt-3">
+       <i class="fas fa-file-csv"></i> Exportar a CSV
+    </a>
+{% else %}
+<div class="alert alert-info">Ningún veterinario atendió consultas en el período seleccionado.</div>
+{% endif %}
+<p class="mt-3"><a href="{{ url_for('routes.staff_reportes_dashboard') }}">Volver al Dashboard Reportes</a></p>
+{% endblock %}

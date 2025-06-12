@@ -1,0 +1,44 @@
+/* app/static/style.css */
+body {
+    font-family: 'Lucida console', serif ; /* Cambia la fuente a Arial o cualquier otra que tengas o vincules */
+    background-color: #81b6eb; /* Un color gris muy claro como fondo, Bootstrap default*/
+    /* background-color: #e9ecef;  /* O prueba con un gris un poco más oscuro */
+    /* background-color: #f0fff0;  /* Un toque verde pálido */
+    color: #370579; /* Color de texto base (oscuro) */
+}
+
+
+.navbar-light.bg-light { /* Selector más específico para sobrescribir estilos Bootstrap */
+    background-color: #e9ecef !important; /* Cambiar el color de fondo de la navbar */
+    border-bottom: 2px solid #ff0606; /* Agregar un borde inferior */
+}
+
+.navbar-light .navbar-brand {
+    color: #17599c; /* Color azul para el logo de la marca */
+    font-weight: bold; /* Texto más negrita */
+}
+ .navbar-light .navbar-nav .nav-link {
+    color: rgba(0,0,0,.7); /* Color de texto para los links */
+ }
+ .navbar-light .navbar-nav .nav-link:hover {
+     color: rgba(0,0,0,1); /* Texto oscuro al pasar el ratón */
+ }
+
+/* Navbar dark theme styles*/
+.navbar-dark {
+    background-color: #1742ce; /* Cambiar el color de fondo de la navbar oscura */
+    border-bottom: 2px solid #f8eeee; /* Agregar un borde inferior */
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: rgb(43, 163, 243); /* Texto blanco al pasar el ratón */
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(15, 226, 241, 0.7); /* Color de texto para los links */
+}
+
+.navbar-dark .navbar-brand {
+    color: #044eec; /* Color blanco para el logo de la marca */
+    font-weight: bold; /* Texto más negrita */
+}

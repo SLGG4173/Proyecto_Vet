@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-md-center">
+    <div class="col-md-6 col-lg-4">
+        <h1 class="mb-4 text-center">Ingreso de Dueño</h1> {# Título #}
+        <form action="" method="post" novalidate> {# novalidate previene validación HTML nativa #}
+            {{ form.hidden_tag() }} {# Campo oculto para protección CSRF #}
+
+            <div class="form-group">
+                {{ form.email.label }}<br> {# Renderiza el label del campo 'email' (que es para email_dueno) #}
+                {{ form.email(size=32, class='form-control', placeholder='Ingresa tu email') }} {# Renderiza el input field, agrega clases CSS y placeholder #}
+                {% for error in form.email.errors %} {# Mostrar errores de validación para este campo #}
+                <span class="text-danger small">[{{ error }}]</span>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                {{ form.password.label }}<br> {# Renderiza el label del campo 'password' #}
+                {{ form.password(size=32, class='form-control', placeholder='Contraseña') }} {# Renderiza el input field #}
+                {% for error in form.password.errors %} {# Mostrar errores #}
+                <span class="text-danger small">[{{ error }}]</span>
+                {% endfor %}
+            </div>
+
+            <div class="form-group form-check"> {# Checkbox "Recuérdame" #}
+                {{ form.remember_me(class='form-check-input') }} {{ form.remember_me.label(class='form-check-label') }}
+            </div>
+
+            <div class="form-group">
+                {{ form.submit(class='btn btn-primary btn-block mt-3') }} {# Botón de submit con clase Bootstrap #}
+            </div>
+        </form>
+         <p class="text-center mt-3">¿No tienes cuenta? <a href="{{ url_for('routes.register') }}">Regístrate aquí</a>.</p> {# Enlace a registro #}
+    </div>
+</div>
+{% endblock %}

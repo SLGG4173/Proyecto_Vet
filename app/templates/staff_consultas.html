@@ -1,0 +1,98 @@
+{% extends "staff_base.html" %}
+
+{% block content %}
+<h1>Gestión de Consultas</h1>
+
+<a href="{{ url_for('routes.add_consulta') }}" class="btn btn-primary mb-3">Agendar Nueva Consulta</a>
+
+<!-- SECCIÓN DE CONSULTAS PENDIENTES -->
+<h3 class="mt-4">Consultas Pendientes y Activas</h3>
+{% if consultas_pendientes %}
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Fecha y Hora</th>
+                <th>Mascota (Dueño)</th>
+                <th>Veterinario</th>
+                <th>Motivo</th>
+                <th>Estado Pago</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for consulta in consultas_pendientes %}
+            <tr>
+                <td>{{ consulta.fecha_hora.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>
+                    <a href="{{ url_for('routes.mascota_detail', mascota_id=consulta.pet.id) }}">{{ consulta.pet.nombre_mascota }}</a>
+                    <small class="d-block">{{ consulta.pet.owner.nombre_dueno if consulta.pet.owner else '' }}</small>
+                </td>
+                <td>Dr. {{ consulta.vet.nombre_veterinario if consulta.vet else 'N/A' }}</td>
+                <td>{{ consulta.motivo_consulta|truncate(30) }}</td>
+                <td>
+                        {% if consulta.estado_pago == 'Pendiente' %}
+                            <span class="badge rounded-pill bg-warning text-dark">{{ consulta.estado_pago }}</span>
+                        {% elif consulta.estado_pago == 'Parcial' %}
+                            <span class="badge rounded-pill bg-info text-dark">{{ consulta.estado_pago }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ consulta.estado_pago }}</span>
+                        {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('routes.edit_consulta', consulta_id=consulta.id) }}" class="btn btn-warning btn-sm">Editar</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <div class="alert alert-success">¡No hay consultas pendientes!</div>
+{% endif %}
+
+<hr class="my-5">
+
+<!-- SECCIÓN DE CONSULTAS PAGADAS (ARCHIVADAS) -->
+<h3 class="mt-4">Historial de Consultas Pagadas</h3>
+{% if consultas_pagadas %}
+    <table class="table table-hover table-sm"> <!-- table-sm para un look más compacto -->
+         <thead>
+            <tr>
+                <th>Fecha y Hora</th>
+                <th>Mascota (Dueño)</th>
+                <th>Veterinario</th>
+                <th>Estado Pago</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for consulta in consultas_pagadas + consultas_canceladas %}
+                <tr class="table-secondary">
+                    <td>{{ consulta.fecha_hora.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>
+                        <a href="{{ url_for('routes.mascota_detail', mascota_id=consulta.pet.id) }}">{{ consulta.pet.nombre_mascota }}</a>
+                        <small class="d-block">{{ consulta.pet.owner.nombre_dueno if consulta.pet.owner else '' }}</small>
+                    </td>
+                    <td>Dr. {{ consulta.vet.nombre_veterinario if consulta.vet else 'N/A' }}</td>
+                    <td>
+                        {% if consulta.estado_pago == 'Pagado' %}
+                            <span class="badge rounded-pill bg-success">{{ consulta.estado_pago }}</span>
+                        {% elif consulta.estado_pago == 'Cancelado' %}
+                            <span class="badge rounded-pill bg-danger">{{ consulta.estado_pago }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ consulta.estado_pago }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if consulta.estado_pago == 'Pagado' %}
+                            <a href="{{ url_for('routes.edit_consulta', consulta_id=consulta.id) }}" class="btn btn-info btn-sm">Ver/Revisar</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <div class="alert alert-info">No hay consultas pagadas en el historial.</div>
+{% endif %}
+<p class="mt-3"><a href="{{ url_for('routes.staff_dashboard') }}">Volver al Dashboard Staff</a></p>
+{% endblock %}

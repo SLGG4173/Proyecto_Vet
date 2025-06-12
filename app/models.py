@@ -67,8 +67,12 @@ class Servicio(db.Model):
     __tablename__ = 'Servicios'
     id = db.Column(db.Integer, primary_key=True)
     nombre_servicio = db.Column(db.String(100), nullable=False, unique=True)
-    descripcion_servicio = db.Column(db.Text, nullable=True)
-    precio = db.Column(db.Numeric(10, 2), nullable=True)
+    descripcion_servicio = db.Column(db.Text)
+    categoria = db.Column(db.String(100), nullable=False, default='General')
+    precio_base = db.Column(db.Numeric(10, 2), nullable=False, default=0.00)
+    duracion_estimada = db.Column(db.Integer, nullable=True) # En minutos
+    activo = db.Column(db.Boolean, nullable=False, default=True)
+    fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
         return f'<Servicio {self.nombre_servicio}>'
@@ -85,20 +89,25 @@ class Consulta(db.Model):
     tratamiento = db.Column(db.Text, nullable=True)
     notas_adicionales = db.Column(db.Text, nullable=True)
     fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow, nullable=True)
-
+    estado_pago = db.Column(db.String(50), nullable=False, default='Pendiente')
     servicio_detalles = db.relationship('DetalleConsultaServicio', backref='consulta_relacionada', lazy='dynamic', cascade='all, delete-orphan')
 
     def __repr__(self):
         pet_name = self.pet.nombre_mascota if self.pet else 'N/A'
         vet_name = f'{self.vet.nombre_veterinario} {self.vet.apellido_veterinario}' if self.vet else 'N/A'
         return f'<Consulta {self.fecha_hora} | Mascota: {pet_name} | Vet: {vet_name}>'
-
-
+    
 class DetalleConsultaServicio(db.Model):
     __tablename__ = 'DetalleConsultaServicio'
-    id_consulta = db.Column(db.Integer, db.ForeignKey('Consultas.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True)
-    id_servicio = db.Column(db.Integer, db.ForeignKey('Servicios.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True)
-    precio_cobrado = db.Column(db.Numeric(10, 2), nullable=True)
+    id = db.Column(db.Integer, primary_key=True) # Nueva PK auto-incremental
+    id_consulta = db.Column(db.Integer, db.ForeignKey('Consultas.id', ondelete='CASCADE'), nullable=False)
+    id_servicio = db.Column(db.Integer, db.ForeignKey('Servicios.id', ondelete='RESTRICT'), nullable=False) # RESTRICT para no borrar servicios usados
+    cantidad = db.Column(db.Integer, nullable=False, default=1)
+    precio_final_aplicado = db.Column(db.Numeric(10, 2), nullable=False)
+    descuento_aplicado = db.Column(db.Numeric(10, 2), default=0.00)
+    notas_servicio = db.Column(db.Text, nullable=True)
+    # Relación para acceder fácilmente al objeto Servicio desde un detalle
+    servicio = db.relationship('Servicio')
 
     def __repr__(self):
          return f'<DetalleConsulta id_consulta={self.id_consulta}, id_servicio={self.id_servicio}>'

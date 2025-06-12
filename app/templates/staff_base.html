@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    {% if title %}
+    <title>Veterinaria Staff - {{ title }}</title>
+    {% else %}
+    <title>Veterinaria Staff</title>
+    {% endif %}
+    <!-- Bootstrap CSS via CDN -->
+    <link rel="stylesheet" href="https://bootswatch.com/5/morph/bootstrap.min.css">
+    <style>
+        /* Optional: Algunos estilos básicos para diferenciar área de staff */
+        body {
+            background-color: #f8f9fa; /* Light gray background */
+        }
+        .navbar-dark {
+            background-color: #343a40 !important; /* Dark navbar for staff area */
+        }
+        .navbar-dark .navbar-brand {
+            color: #fff;
+        }
+        .sidebar { /* Example sidebar styles if you add one later */
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100; /* Behind the navbar */
+            padding: 48px 0 0; /* Pad for navbar */
+            box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+        }
+    </style>
+</head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+<body>
+    {# Barra de Navegación para el área de Staff #}
+    <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
+        <a class="navbar-brand col-sm-3 col-md-2 mr-0 px-3" href="{{ url_for('routes.staff_dashboard') }}">Panel Staff</a>
+        <ul class="navbar-nav px-3">
+            <li class="nav-item text-nowrap">
+                {# Usamos g.staff_user para el usuario de staff logueado #}
+                {% if g.staff_user %}
+                <span class="navbar-text mr-3">Hola, {{ g.staff_user.nombre_completo or g.staff_user.username }} ({{ g.staff_user.rol }})</span>
+                <a class="nav-link d-inline" href="{{ url_for('routes.staff_logout') }}">Cerrar Sesión</a>
+                {% else %}
+                 {# Esto no debería verse si se aplica @staff_login_required correctamente #}
+                <a class="nav-link" href="{{ url_for('routes.staff_login') }}">Ingresar Staff</a>
+                {% endif %}
+            </li>
+        </ul>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            {# Aquí podrías poner una barra lateral de navegación (sidebar) #}
+            {# <nav class="col-md-2 d-none d-md-block bg-light sidebar"> ... </nav> #}
+
+            {# Contenido principal #}
+            <main role="main" class="container justify-content-center align-items-center" style="padding-top: 60px; min-height: calc(100vh - 60px);"> {#/* Add padding for fixed navbar */#}
+                {# Renderizar mensajes flash #}
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="mt-4"> 
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    {% endfor %}
+                     </div>
+                {% endif %}
+                {% endwith %}
+
+                {# Bloque donde se inyecta el contenido de las plantillas de staff #}
+                {% block content %}
+                
+                {% endblock %}
+            </main>
+        </div>
+    </div>
+
+
+    <!-- Optional JavaScript for Bootstrap -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    {# Puedes agregar archivos JS estáticos aquí si los necesitas en el área de staff #}
+     {# <script src="{{ url_for('static', filename='staff_scripts.js') }}"></script> #}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        // Encontrar todos los botones que son tipo submit en un formulario y tienen data-confirm-text
+        const confirmButtons = document.querySelectorAll('form button[type="submit"][data-confirm-text]');
+        confirmButtons.forEach(function(button) {
+            // Añadir un event listener al submit de la FORM padre, NO al click del botón
+            // Así la lógica de confirmación se ejecuta ANTES de que el submit ocurra realmente
+            const form = button.closest('form');
+                if (form) {
+                    form.addEventListener('submit', function(event) {
+                        // Prevenir el submit por defecto si no se confirma
+                        if (!confirm(button.getAttribute('data-confirm-text'))) {
+                            event.preventDefault(); // Detener el submit si el usuario presiona Cancelar en el confirm
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

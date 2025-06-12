@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="jumbotron text-center"> {# Centrado simple #}
+    <h1 class="display-4">¡Bienvenido a Nuestra Veterinaria!</h1>
+    <p class="lead">Tu clínica de confianza para el cuidado de tus mascotas.</p>
+    <hr class="my-4">
+    {% if not current_user.is_authenticated %}
+        <p>Por favor, inicia sesión o regístrate para gestionar tus mascotas y consultas.</p>
+        {# Enlaces de acción #}
+        <a class="btn btn-outline-primary btn-lg mx-1" href="{{ url_for('routes.login') }}" role="button">Ingresar</a> {# mx-1 adds horizontal margin #}
+        <a class="btn btn-outline-primary btn-lg mx-1" href="{{ url_for('routes.register') }}" role="button">Registrarse</a>
+    {% else %}
+        <p>Hola, {{ current_user.nombre_dueno }}. Explora tu dashboard.</p> {# Mostrar nombre del Dueño #}
+         {# Enlace a dashboard #}
+         <a class="btn btn-primary btn-lg" href="{{ url_for('routes.dashboard') }}" role="button">Ir a Dashboard</a>
+    {% endif %}
+</div>
+{% endblock %}

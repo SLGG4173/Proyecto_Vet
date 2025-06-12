@@ -1,6 +1,6 @@
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, DateField, SelectField, TextAreaField, DecimalField, HiddenField, FormField, FieldList, BooleanField # Importamos FormField y FieldList si se usan subformularios
+from wtforms import IntegerField, StringField, PasswordField, BooleanField, SubmitField, DateField, SelectField, TextAreaField, DecimalField, HiddenField, FormField, FieldList, BooleanField, MonthField # Importamos FormField y FieldList si se usan subformularios
 from wtforms.validators import DataRequired, ValidationError, Email, EqualTo, Length, Optional, AnyOf
 from app.models import Dueno, Mascota, Veterinario, Servicio, Usuario # Importar modelos
 
@@ -65,18 +65,39 @@ class ConsultaForm(FlaskForm):
     diagnostico = TextAreaField('Diagnóstico', validators=[Optional()])
     tratamiento = TextAreaField('Tratamiento', validators=[Optional()])
     notas_adicionales = TextAreaField('Notas Adicionales', validators=[Optional()])
+    estado_pago = SelectField('Estado del Pago',
+                              choices=[('Pendiente', 'Pendiente'),
+                                       ('Pagado', 'Pagado'),
+                                       ('Parcial', 'Pago Parcial'),
+                                       ('Cancelado', 'Cancelado')],
+                              validators=[DataRequired()])
 
     submit = SubmitField('Guardar Consulta')
 
-# Formulario simple para Añadir Detalle de Servicio a una Consulta (podría ser más complejo)
-# Este podría ser parte del formulario de edición de Consulta o uno separado
-class DetalleConsultaServicioForm(FlaskForm):
-    # id_servicio: SelectField poblado dinámicamente con servicios disponibles
-    id_servicio = SelectField('Servicio', coerce=int, validators=[DataRequired()])
-    # Precio: Puede tener un valor predeterminado del servicio, pero permitir cambio
-    precio_cobrado = DecimalField('Precio Cobrado', validators=[Optional()])
-    submit = SubmitField('Agregar Servicio')
+# --- FORMULARIO PARA GESTIONAR SERVICIOS ---
+class ServicioForm(FlaskForm):
+    nombre_servicio = StringField('Nombre del Servicio', validators=[DataRequired(), Length(max=100)])
+    descripcion_servicio = TextAreaField('  Descripción', validators=[Optional()])
+    categoria = StringField('Categoría', validators=[DataRequired(), Length(max=100)])
+    precio_base = DecimalField('Precio Base', validators=[DataRequired()], places=2)
+    duracion_estimada = IntegerField('Duración Estimada (minutos)', validators=[Optional()])
+    activo = BooleanField('Servicio Activo', default=True)
+    submit = SubmitField('Guardar Servicio')
 
+# SubFormulario para Añadir Detalle de Servicio a una Consulta
+class DetalleConsultaServicioForm(FlaskForm):
+    id_servicio = SelectField('Servicio', coerce=int, validators=[DataRequired()])
+    cantidad = IntegerField('Cantidad', default=1, validators=[DataRequired()])
+    precio_final_aplicado = DecimalField('Precio Aplicado', validators=[DataRequired()], places=2)
+    descuento_aplicado = DecimalField('Descuento', default=0.00, validators=[Optional()], places=2)
+    notas_servicio = TextAreaField('Notas del Servicio', validators=[Optional()])
+    submit = SubmitField('Añadir Servicio')
+
+# Formulario para generar reportes de ingresos
+class ReporteIngresosForm(FlaskForm):
+    # Usamos MonthField para que el usuario pueda seleccionar un mes y año
+    mes_anio = MonthField('Seleccionar Mes y Año', format='%Y-%m', validators=[Optional()])
+    submit = SubmitField('Generar Reporte')
 
 # --- NUEVO FORMULARIO PARA GESTIONAR VETERINARIOS (ADMIN/STAFF) ---
 
@@ -181,7 +202,7 @@ class VeterinarioFormStaff(FlaskForm):
         # No hay validacion de requerimiento de password aqui, eso es solo para CREACION o CAMBIO (si implementas cambio de password separado).
         # Si implementaras cambio de password: deberias añadir campos old_password, new_password, new_password2
         # y validar condicionalmente si new_password se llena y old_password coincide.
-
+        
         # Consideraciones adicionales: Email UNIQUE para Vets, Username UNIQUE para Usuarios ya están manejados en la validación estándar y la DB level constraint
 
         return initial_validation

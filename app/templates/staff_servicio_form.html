@@ -1,0 +1,40 @@
+<!-- app/templates/staff_servicio_form.html -->
+{% extends "staff_base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h1>{{ title }}</h1>
+        <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.nombre_servicio.label }}
+                {{ form.nombre_servicio(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.categoria.label }}
+                {{ form.categoria(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.descripcion_servicio.label }}
+                {{ form.descripcion_servicio(class="form-control", rows=3) }}
+            </div>
+            <div class="form-group">
+                {{ form.precio_base.label }}
+                {{ form.precio_base(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.duracion_estimada.label }}
+                {{ form.duracion_estimada(class="form-control") }}
+            </div>
+            <div class="form-group form-check">
+                {{ form.activo(class="form-check-input") }}
+                {{ form.activo.label(class="form-check-label") }}
+            </div>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-primary") }}
+                <a href="{{ url_for('routes.staff_list_servicios') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

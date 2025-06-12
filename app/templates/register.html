@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-md-center">
+    <div class="col-md-6 col-lg-5">
+        <h1 class="mb-4 text-center">Registro de Dueño</h1> {# Título #}
+        <form action="" method="post" novalidate>
+            {{ form.hidden_tag() }} {# Campo oculto CSRF #}
+
+            {# Campo Nombre #}
+            <div class="form-group">
+                {{ form.nombre_dueno.label(class='form-label') }}<br>
+                {{ form.nombre_dueno(class='form-control', placeholder='Tu nombre') }}
+                {% for error in form.nombre_dueno.errors %}
+                <div class="text-danger small">[{{ error }}]</div>
+                {% endfor %}
+            </div>
+
+            {# Campo Apellido #}
+             <div class="form-group">
+                {{ form.apellido_dueno.label(class='form-label') }}<br>
+                {{ form.apellido_dueno(class='form-control', placeholder='Tu apellido') }}
+                {% for error in form.apellido_dueno.errors %}
+                <div class="text-danger small">[{{ error }}]</div>
+                {% endfor %}
+            </div>
+
+            {# Campo Email #}
+            <div class="form-group">
+                {{ form.email_dueno.label(class='form-label') }}<br>
+                {{ form.email_dueno(class='form-control', placeholder='Tu email (ej: nombre@ejemplo.com)') }}
+                {% for error in form.email_dueno.errors %}
+                <div class="text-danger small">[{{ error }}]</div>
+                {% endfor %}
+            </div>
+
+            {# Campo Teléfono (Opcional) #}
+             <div class="form-group">
+                {{ form.telefono_dueno.label(class='form-label') }}<br>
+                {{ form.telefono_dueno(class='form-control', placeholder='Tu teléfono (opcional)') }}
+                {% for error in form.telefono_dueno.errors %}
+                <div class="text-danger small">[{{ error }}]</div>
+                {% endfor %}
+            </div>
+
+             {# Campo Dirección (Opcional) #}
+             <div class="form-group">
+                {{ form.direccion_dueno.label(class='form-label') }}<br>
+                {{ form.direccion_dueno(class='form-control', placeholder='Tu dirección (opcional)') }}
+                {% for error in form.direccion_dueno.errors %}
+                <div class="text-danger small">[{{ error }}]</div>
+                {% endfor %}
+            </div>
+
+            {# Campo Contraseña #}
+            <div class="form-group">
+                {{ form.password.label(class='form-label') }}<br>
+                {{ form.password(class='form-control', placeholder='Crea una contraseña') }}
+                {% for error in form.password.errors %}
+                <div class="text-danger small">[{{ error }}]</div>
+                {% endfor %}
+            </div>
+
+            {# Campo Repetir Contraseña #}
+            <div class="form-group">
+                {{ form.password2.label(class='form-label') }}<br>
+                {{ form.password2(class='form-control', placeholder='Repite la contraseña') }}
+                {% for error in form.password2.errors %}
+                <div class="text-danger small">[{{ error }}]</div>
+                {% endfor %}
+            </div>
+
+            {# Botón de Submit #}
+            <div class="form-group">
+                {{ form.submit(class='btn btn-primary btn-block mt-4') }}
+            </div>
+        </form>
+        <p class="text-center mt-3">¿Ya tienes cuenta? <a href="{{ url_for('routes.login') }}">Inicia sesión aquí</a>.</p> {# Enlace a login #}
+    </div>
+</div>
+{% endblock %}

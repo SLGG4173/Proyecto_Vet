@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Mis Mascotas</h1>
+
+{# Enlace para agregar nueva mascota, usa url_for correcta #}
+<a href="{{ url_for('routes.add_mascota') }}" class="btn btn-primary mb-3">Agregar Nueva Mascota</a>
+
+{# Comprueba si hay mascotas en la lista que le pasaste #}
+{% if mascotas %}
+<ul class="list-group">
+    {# Itera sobre la lista de mascotas #}
+    {% for mascota in mascotas %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+            {# Enlace al detalle de la mascota, usa url_for correcta pasando el id #}
+            <a href="{{ url_for('routes.mascota_detail', mascota_id=mascota.id) }}">
+                {# Mostrar nombre de la mascota #}
+                <strong>{{ mascota.nombre_mascota }}</strong>
+                {# Mostrar especie y raza si existen #}
+                ({{ mascota.especie if mascota.especie else 'Especie Desconocida' }}
+                 - {{ mascota.raza if mascota.raza else 'Raza Desconocida' }})
+            </a><br>
+            {# Mostrar fecha de nacimiento si existe, formatea a YYYY-MM-DD #}
+            <small>Fecha Nac: {{ mascota.fecha_nacimiento.strftime('%Y-%m-%d') if mascota.fecha_nacimiento else 'N/A' }}</small>
+             {# No es necesario mostrar el dueño, ya que estamos en la vista de SU dueño #}
+        </div>
+        {# Botones de Editar y Eliminar Mascotas #}
+        <div>
+            <a href="{{ url_for('routes.edit_mascota', mascota_id=mascota.id) }}" class="btn btn-warning btn-sm">Editar</a>
+            <form action="{{ url_for('routes.delete_mascota', mascota_id=mascota.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Estás seguro de eliminar a {{ mascota.nombre_mascota }}? Esta acción no se puede deshacer.');">
+                {{ csrf_form.csrf_token }} {# Necesitarás pasar csrf_form desde la ruta #}
+                <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+            </form>
+        </div>
+        
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+{# Mensaje si no hay mascotas #}
+<div class="alert alert-info" role="alert">
+    Aún no tienes mascotas registradas. ¡Haz clic arriba para agregar la primera!
+</div>
+{% endif %}
+
+{% endblock %}

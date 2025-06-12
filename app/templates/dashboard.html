@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+{# Mostrar nombre del Dueño logueado #}
+<h1>Bienvenido, {{ dueno.nombre_dueno }} {{ dueno.apellido_dueno }}</h1>
+<p>Este es tu panel de control. Desde aquí puedes gestionar tu información y la de tus mascotas.</p>
+
+<h2>Acciones Rápidas</h2>
+<div class="row">
+    {# Tarjeta para Ver Mis Mascotas, usa url_for correcta #}
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Ver Mis Mascotas</h5>
+                <p class="card-text">Explora y gestiona la información de tus fieles compañeros.</p>
+                <a href="{{ url_for('routes.list_mascotas') }}" class="btn btn-primary">Ir a Mascotas</a>
+            </div>
+        </div>
+    </div>
+    {# Tarjeta para Ver Mis Consultas, usa url_for correcta #}
+    <div class="col-md-4 mb-3">
+         <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Mis Consultas</h5>
+                <p class="card-text">Revisa el historial y próximas consultas de tus mascotas.</p>
+                <a href="{{ url_for('routes.list_consultas') }}" class="btn btn-secondary">Ver Consultas</a>
+            </div>
+        </div>
+    </div>
+     {# Tarjeta para Agregar Mascota, usa url_for correcta #}
+     <div class="col-md-4 mb-3">
+         <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Agregar Mascota</h5>
+                <p class="card-text">Registra una nueva mascota asociada a tu perfil.</p>
+                <a href="{{ url_for('routes.add_mascota') }}" class="btn btn-success">Agregar Mascota</a>
+            </div>
+        </div>
+    </div>
+     {# Aquí podrías añadir más tarjetas: Agendar Cita (si implementas form), Editar Perfil, etc. #}
+</div>
+{% endblock %}

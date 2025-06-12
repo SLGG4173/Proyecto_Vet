@@ -1,0 +1,217 @@
+<!-- app/templates/consulta_form.html -->
+{% extends "staff_base.html" %}
+
+{% block content %}
+<h1 class="mb-4 text-center">{{ title }}</h1>
+
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <!-- FORMULARIO PRINCIPAL PARA EDITAR/AÑADIR LA CONSULTA -->
+        <form id="main-consulta-form" method="POST" novalidate>
+            {{ form.hidden_tag() }}
+
+            <div class="row">
+                <!-- Columna para info básica -->
+                <div class="col-md-6">
+                    <h4 class="mb-3">Información de la Consulta</h4>
+
+                    <!-- Campo Mascota (Select Field) -->
+                    <div class="form-group">
+                        {{ form.id_mascota.label(class='form-label') }}
+                        {{ form.id_mascota(class='form-control') }}
+                        {% for error in form.id_mascota.errors %}<div class="text-danger small">[{{ error }}]</div>{% endfor %}
+                    </div>
+
+                    <!-- Campo Veterinario (Select Field) -->
+                    <div class="form-group">
+                        {{ form.id_veterinario.label(class='form-label') }}
+                        {{ form.id_veterinario(class='form-control') }}
+                        {% for error in form.id_veterinario.errors %}<div class="text-danger small">[{{ error }}]</div>{% endfor %}
+                    </div>
+
+                    <!-- Campo Fecha (Date Field) -->
+                    <div class="form-group">
+                        {{ form.fecha.label(class='form-label') }}
+                        {{ form.fecha(class='form-control', type='date') }}
+                        {% for error in form.fecha.errors %}<div class="text-danger small">[{{ error }}]</div>{% endfor %}
+                    </div>
+
+                    <!-- Campo Hora (String Field HH:MM) -->
+                    <div class="form-group">
+                        {{ form.hora.label(class='form-label') }}
+                        {{ form.hora(class='form-control', placeholder='HH:MM', pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]") }}
+                        {% for error in form.hora.errors %}<div class="text-danger small">[{{ error }}]</div>{% endfor %}
+                    </div>
+
+                    <!-- Campo Motivo (TextArea) -->
+                    <div class="form-group">
+                        {{ form.motivo_consulta.label(class='form-label') }}
+                        {{ form.motivo_consulta(class='form-control', rows=3) }}
+                        {% for error in form.motivo_consulta.errors %}<div class="text-danger small">[{{ error }}]</div>{% endfor %}
+                    </div>
+                    
+                    <!-- Campo Estado de Pago -->
+                    <div class="form-group">
+                        {{ form.estado_pago.label(class='form-label') }}
+                        {{ form.estado_pago(class='form-control') }}
+                        {% for error in form.estado_pago.errors %}<div class="text-danger small">[{{ error }}]</div>{% endfor %}
+                    </div>
+                </div>
+
+                <!-- Columna para Detalles Clínicos (Solo visible para roles Vet/Admin) -->
+                {% if g.staff_user and (g.staff_user.rol in ['veterinario', 'admin']) %}
+                <div class="col-md-6">
+                    <h4 class="mb-3">Detalles Clínicos</h4>
+                    <!-- Campo Diagnóstico -->
+                    <div class="form-group">
+                        {{ form.diagnostico.label(class='form-label') }}
+                        {{ form.diagnostico(class='form-control', rows=3, placeholder='Notas sobre el diagnóstico...') }}
+                        {% for error in form.diagnostico.errors %}<div class="text-danger small">[{{ error }}]</div>{% endfor %}
+                    </div>
+                    <!-- Campo Tratamiento (Texto Libre) -->
+                    <div class="form-group">
+                        {{ form.tratamiento.label(class='form-label') }}
+                        {{ form.tratamiento(class='form-control', id='tratamiento_textarea', rows=5, placeholder='Descripción del tratamiento general...') }}
+                        {% for error in form.tratamiento.errors %}<div class="text-danger small">[{{ error }}]</div>{% endfor %}
+                    </div>
+                    <!-- Campo Notas Adicionales -->
+                    <div class="form-group">
+                        {{ form.notas_adicionales.label(class='form-label') }}
+                        {{ form.notas_adicionales(class='form-control', rows=3, placeholder='Otras notas...') }}
+                        {% for error in form.notas_adicionales.errors %}<div class="text-danger small">[{{ error }}]</div>{% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Botón de Submit para el formulario principal -->
+            <div class="form-group text-center mt-4">
+                {{ form.submit(class='btn btn-primary mr-2') }}
+                <a href="{{ url_for('routes.staff_list_consultas') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+        <!-- FIN DEL FORMULARIO PRINCIPAL -->
+
+        <!-- SECCIÓN DE SERVICIOS APLICADOS (Solo en modo Edición) -->
+        {% if consulta %}
+            <hr class="my-5">
+
+            <div class="row">
+                <div class="col-12">
+                    <h3 class="mb-3">Servicios Facturables Aplicados</h3>
+                    
+                    {% if consulta.servicio_detalles.all() %}
+                        <table class="table table-bordered table-sm">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Servicio</th>
+                                    <th class="text-center">Cantidad</th>
+                                    <th class="text-right">Precio</th>
+                                    <th class="text-right">Descuento</th>
+                                    <th class="text-right">Subtotal</th>
+                                    <th>Notas</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% set total_consulta = namespace(valor=0) %}
+                                {% for detalle in consulta.servicio_detalles.all() %}
+                                    {% set subtotal = (detalle.cantidad * detalle.precio_final_aplicado) - detalle.descuento_aplicado %}
+                                    {% set total_consulta.valor = total_consulta.valor + subtotal %}
+                                    <tr>
+                                        <td>{{ detalle.servicio.nombre_servicio }}</td>
+                                        <td class="text-center">{{ detalle.cantidad }}</td>
+                                        <td class="text-right">${{ "%.2f"|format(detalle.precio_final_aplicado) }}</td>
+                                        <td class="text-right">${{ "%.2f"|format(detalle.descuento_aplicado) }}</td>
+                                        <td class="text-right">${{ "%.2f"|format(subtotal) }}</td>
+                                        <td>{{ detalle.notas_servicio or '' }}</td>
+                                        <td>
+                                            <form action="{{ url_for('routes.delete_detalle_servicio', detalle_id=detalle.id) }}" method="POST" style="display:inline;">
+                                                {{ csrf_form.csrf_token }}
+                                                <button type="submit" class="btn btn-danger btn-xs" onclick="return confirm('¿Quitar este servicio de la consulta?')">Quitar</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="4" class="text-right">Total:</th>
+                                    <th colspan="3" class="text-right">${{ "%.2f"|format(total_consulta.valor) }}</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    {% else %}
+                        <div class="alert alert-info">Aún no se han añadido servicios a esta consulta.</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Añadir Servicio Facturable</h5>
+                        </div>
+                        <div class="card-body">
+                            <form action="{{ url_for('routes.add_detalle_servicio_to_consulta', consulta_id=consulta.id) }}" method="POST" novalidate id="add-service-form">
+                                {{ add_service_form.hidden_tag() }}
+                                <div class="form-row">
+                                    <div class="form-group col-md-4">
+                                        {{ add_service_form.id_servicio.label(class="form-control-label") }}
+                                        {{ add_service_form.id_servicio(class="form-control", id="servicio_select") }}
+                                    </div>
+                                    <div class="form-group col-md-1">
+                                        {{ add_service_form.cantidad.label(class="form-control-label") }}
+                                        {{ add_service_form.cantidad(class="form-control") }}
+                                    </div>
+                                    <div class="form-group col-md-2">
+                                        {{ add_service_form.precio_final_aplicado.label(class="form-control-label") }}
+                                        {{ add_service_form.precio_final_aplicado(class="form-control", id="precio_input", placeholder="Precio") }}
+                                    </div>
+                                    <div class="form-group col-md-2">
+                                        {{ add_service_form.descuento_aplicado.label(class="form-control-label") }}
+                                        {{ add_service_form.descuento_aplicado(class="form-control", placeholder="0.00") }}
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    {{ add_service_form.notas_servicio.label(class="form-control-label") }}
+                                    {{ add_service_form.notas_servicio(class='form-control', rows=2, placeholder='Notas opcionales...') }}
+                                </div>
+                                <div class="form-group">
+                                    {{ add_service_form.submit(class="btn btn-success") }}
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<!-- SCRIPT JS MEJORADO para auto-rellenar precio -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const servicioSelect = document.getElementById('servicio_select');
+    const precioInput = document.getElementById('precio_input');
+
+    if (servicioSelect && precioInput) {
+        servicioSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const optionText = selectedOption.text;
+            // Busca el precio dentro del texto de la opción. Ej: "Vacuna Rabia ($25.00)"
+            const priceMatch = optionText.match(/\\$(\\d+\\.\\d{2})/);
+
+            if (priceMatch && priceMatch[1]) {
+                precioInput.value = priceMatch[1];
+            } else {
+                // Si el usuario selecciona "--- Seleccionar ---" o la opción no tiene precio
+                precioInput.value = ''; 
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

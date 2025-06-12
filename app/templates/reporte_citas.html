@@ -1,0 +1,58 @@
+<!-- app/templates/reporte_citas.html -->
+{% extends "staff_base.html" %}
+{% block content %}
+<h1>{{ title }}</h1>
+
+<!-- Formulario de Filtros -->
+<div class="card my-4">
+    <div class="card-body">
+        <form method="POST" class="form-inline">
+            {{ form.hidden_tag() }}
+            <div class="form-group mr-3">
+                {{ form.mes_anio.label(class="mr-2") }}
+                {{ form.mes_anio(class="form-control") }}
+            </div>
+            {{ form.submit(class="btn btn-primary") }}
+        </form>
+    </div>
+</div>
+
+<!-- Resultados del Reporte -->
+{% if report_data %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-header">Citas Atendidas</div>
+            <div class="card-body">
+                <h2 class="card-title">{{ report_data.atendidas }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-danger mb-3">
+            <div class="card-header">Citas No Asistidas / Canceladas</div>
+            <div class="card-body">
+                <h2 class="card-title">{{ report_data.no_asistidas }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+<h4 class="mt-4">Desglose por Estado:</h4>
+<ul class="list-group">
+    {% for estado, cantidad in report_data.detalle.items() %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        {{ estado }}
+        <span class="badge badge-primary badge-pill">{{ cantidad }}</span>
+    </li>
+    {% endfor %}
+</ul>
+<!-- BOTÓN DE EXPORTACIÓN -->
+    <a href="{{ url_for('routes.exportar_reporte_citas', mes_anio=form.mes_anio.data.strftime('%Y-%m') if form.mes_anio.data else '') }}" 
+       class="btn btn-success mt-3">
+       <i class="fas fa-file-csv"></i> Exportar a CSV
+    </a>
+{% else %}
+<div class="alert alert-info">No hay datos de citas para el período seleccionado.</div>
+{% endif %}
+<p class="mt-3"><a href="{{ url_for('routes.staff_reportes_dashboard') }}">Volver al Dashboard Reportes</a></p>
+{% endblock %}

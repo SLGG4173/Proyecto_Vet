@@ -1,0 +1,48 @@
+<!-- app/templates/reportes_dashboard.html -->
+{% extends "staff_base.html" %}
+{% block content %}
+<h1>Panel de Reportes</h1>
+<p class="text-muted">Selecciona un reporte para analizar el rendimiento de la clínica.</p>
+<div class="row">
+    <!-- Tarjeta para Reporte de Citas -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Reporte de Citas Mensual</h5>
+                <p class="card-text">Analiza la cantidad de citas atendidas y no asistidas por mes.</p>
+                <a href="{{ url_for('routes.reporte_citas_mensual') }}" class="btn btn-primary">Ver Reporte</a>
+            </div>
+        </div>
+    </div>
+    <!-- Tarjeta para Reporte de Servicios Populares -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Top 5 Servicios Mensuales</h5>
+                <p class="card-text">Identifica los servicios más frecuentes por mes.</p>
+                <a href="{{ url_for('routes.reporte_servicios_populares') }}" class="btn btn-info">Ver Reporte</a>
+            </div>
+        </div>
+    </div>
+    <!-- Tarjeta para Reporte de Ingresos por Categoría -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Ingresos por Categoría de Servicio</h5>
+                <p class="card-text">Desglosa los ingresos totales por cada categoría de servicio.</p>
+                <a href="{{ url_for('routes.reporte_ingresos_categoria') }}" class="btn btn-success">Ver Reporte</a>
+            </div>
+        </div>
+    </div>
+    <!-- Tarjeta para Reporte de Consultas por Veterinario -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Consultas por Veterinario</h5>
+                <p class="card-text">Muestra el volumen de consultas atendidas por cada veterinario.</p>
+                <a href="{{ url_for('routes.reporte_consultas_veterinario') }}" class="btn btn-warning">Ver Reporte</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

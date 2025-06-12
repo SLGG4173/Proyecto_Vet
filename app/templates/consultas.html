@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block content %}
+{# Título de la página - pasado desde la ruta #}
+<h1>Mis Consultas Programadas</h1>
+
+{# Aquí podrías añadir un enlace o un botón para Agendar Nueva Cita/Consulta si implementas un formulario para eso en el lado del dueño (más complejo) o solo para el staff. #}
+{# <a href="{{ url_for('routes.add_consulta_dueño') }}" class="btn btn-primary mb-3">Agendar Nueva Cita</a> #}
+
+{# Comprueba si hay consultas #}
+{% if consultas %}
+    <ul class="list-group">
+        {# Itera sobre la lista de consultas #}
+        {% for consulta in consultas %}
+        {# Un item de lista por cada consulta #}
+        <li class="list-group-item mb-3">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">Consulta para {{ consulta.pet.nombre_mascota if consulta.pet else 'Mascota Desconocida' }}</h5>
+                <!-- MOSTRAR ESTADO DE PAGO -->
+                <small>Estado del Pago: <span class="badge badge-pill badge-{{ 'success' if consulta.estado_pago == 'Pagado' else 'warning' }}">{{ consulta.estado_pago }}</span></small>
+            </div>
+            <p class="mb-1"><strong>Fecha y Hora:</strong> {{ consulta.fecha_hora.strftime('%Y-%m-%d a las %H:%M') }}</p>
+            <p class="mb-1"><strong>Veterinario:</strong> Dr. {{ consulta.vet.nombre_veterinario if consulta.vet else 'N/A' }} {{ consulta.vet.apellido_veterinario if consulta.vet else '' }}</p>
+            <p class="mb-1"><strong>Motivo:</strong> {{ consulta.motivo_consulta or 'No especificado' }}</p>
+            
+            {# Mostrar los DETALLES DEL SERVICIO asociados a esta CONSULTA, similar a mascota_detail #}
+            {% if consulta.servicio_detalles.all() %}
+                <h6 class="mt-4">Resumen de Servicios y Costos:</h6>
+                <table class="table table-sm table-striped mt-2">
+                    <thead>
+                        <tr>
+                            <th>Servicio</th>
+                            <th class="text-right">Precio</th>
+                            <th class="text-right">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set total_consulta = namespace(valor=0) %}
+                        {% for detalle in consulta.servicio_detalles.all() %}
+                            {% set subtotal = (detalle.cantidad * detalle.precio_final_aplicado) - detalle.descuento_aplicado %}
+                            {% set total_consulta.valor = total_consulta.valor + subtotal %}
+                            <tr>
+                                <td>{{ detalle.servicio.nombre_servicio }} x{{ detalle.cantidad }}</td>
+                                <td class="text-right">${{ "%.2f"|format(detalle.precio_final_aplicado) }}</td>
+                                <td class="text-right">${{ "%.2f"|format(subtotal) }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="2" class="text-right">Total a Pagar:</th>
+                            <th class="text-right">${{ "%.2f"|format(total_consulta.valor) }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            {% endif %}
+
+        </li>
+        {% endfor %}
+    </ul>
+{% else %}
+{# Mensaje si no hay consultas #}
+    <div class="alert alert-info" role="alert">
+        No tienes consultas registradas para tus mascotas.
+    </div>
+{% endif %}
+
+{# Opcional: enlace de regreso a dashboard o mascotas #}
+{# <a href="{{ url_for('routes.dashboard') }}" class="btn btn-secondary mt-3">Volver al Dashboard</a> #}
+
+{% endblock %}

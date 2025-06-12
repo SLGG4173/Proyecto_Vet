@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block content %}
+{# Mostrar detalles de la mascota específica #}
+<h1>Detalle de Mascota: {{ mascota.nombre_mascota }}</h1>
+
+<div class="card mb-4"> {# Estructura básica Bootstrap #}
+    <div class="card-body">
+        <h5 class="card-title">{{ mascota.nombre_mascota }}</h5> {# Título de la tarjeta #}
+        <p><strong>Especie:</strong> {{ mascota.especie if mascota.especie else 'N/A' }}</p>
+        <p><strong>Raza:</strong> {{ mascota.raza if mascota.raza else 'N/A' }}</p>
+        <p><strong>Fecha de Nacimiento:</strong> {{ mascota.fecha_nacimiento.strftime('%Y-%m-%d') if mascota.fecha_nacimiento else 'N/A' }}</p>
+        {# Mostrar Dueño - Aunque ya sabemos quién es, podríamos poner el nombre completo #}
+        {# <p><strong>Dueño:</strong> {{ mascota.owner.nombre_dueno }} {{ mascota.owner.apellido_dueno }}</p> #}
+    </div>
+</div>
+
+{# Mostrar la lista de consultas relacionadas #}
+<h2>Historial de Consultas</h2>
+{# Comprueba si hay consultas #}
+{% if consultas %}
+<ul class="list-group">
+    {# Itera sobre la lista de consultas #}
+    {% for consulta in consultas %}
+    {# Un item de la lista por cada consulta #}
+    <li class="list-group-item mb-2">
+        {# Mostrar fecha y hora de la consulta, formateada #}
+         <p class="mb-1"><strong>Fecha y Hora:</strong> {{ consulta.fecha_hora.strftime('%Y-%m-%d %H:%M') if consulta.fecha_hora else 'N/A' }}</p>
+         {# Mostrar veterinario asociado a la consulta #}
+         <p class="mb-1"><strong>Veterinario:</strong> {{ consulta.vet.nombre_veterinario if consulta.vet and consulta.vet.nombre_veterinario else 'Sin asignar' }} {{ consulta.vet.apellido_veterinario if consulta.vet and consulta.vet.apellido_veterinario else '' }}</p>
+         {# Mostrar motivo de la consulta #}
+         <p class="mb-1"><strong>Motivo:</strong> {{ consulta.motivo_consulta if consulta.motivo_consulta else 'Sin especificar' }}</p>
+         {# Mostrar diagnóstico #}
+         {% if consulta.diagnostico %}
+             <p class="mb-1"><strong>Diagnóstico:</strong> {{ consulta.diagnostico | replace('\n', '<br>') | safe }}</p> {# |safe y replace para saltos de línea HTML #}
+         {% endif %}
+         {# Mostrar tratamiento #}
+          {% if consulta.tratamiento %}
+             <p class="mb-1"><strong>Tratamiento:</strong> {{ consulta.tratamiento | replace('\n', '<br>') | safe }}</p>
+         {% endif %}
+         {# Mostrar notas adicionales #}
+          {% if consulta.notas_adicionales %}
+             <p class="mb-1"><strong>Notas Adicionales:</strong> {{ consulta.notas_adicionales | replace('\n', '<br>') | safe }}</p>
+         {% endif %}
+
+         {# --- Aquí podrías mostrar los DETALLES DEL SERVICIO asociados a esta CONSULTA --- #}
+         {# Si la relación 'servicio_detalles' en el modelo Consulta está bien definida #}
+         {% if consulta.servicio_detalles.all() %}
+            <h6 class="mt-4">Resumen de Servicios y Costos:</h6>
+            <table class="table table-sm table-striped mt-2">
+                <thead>
+                    <tr>
+                        <th>Servicio</th>
+                        <th class="text-center">Cantidad</th>
+                        <th class="text-right">Precio</th>
+                        <th class="text-right">Descuento</th>
+                        <th class="text-right">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set total_consulta = namespace(valor=0) %}
+                    {% for detalle in consulta.servicio_detalles.all() %}
+                        {% set subtotal = (detalle.cantidad * detalle.precio_final_aplicado) - detalle.descuento_aplicado %}
+                        {% set total_consulta.valor = total_consulta.valor + subtotal %}
+                        <tr>
+                            <td>{{ detalle.servicio.nombre_servicio }}</td>
+                            <td class="text-center">{{ detalle.cantidad }}</td>
+                            <td class="text-right">${{ "%.2f"|format(detalle.precio_final_aplicado) }}</td>
+                            <td class="text-right">${{ "%.2f"|format(detalle.descuento_aplicado) }}</td>
+                            <td class="text-right">${{ "%.2f"|format(subtotal) }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="4" class="text-right">Total a Pagar:</th>
+                        <th class="text-right">${{ "%.2f"|format(total_consulta.valor) }}</th>
+                    </tr>
+                </tfoot>
+            </table>
+        {% endif %}
+         {# ----------------------------------------------------------------------------- #}
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+{# Mensaje si no hay consultas para esta mascota #}
+ <div class="alert alert-info" role="alert">
+    No hay historial de consultas para {{ mascota.nombre_mascota }} todavía.
+</div>
+{% endif %}
+
+{# Enlace para volver a la lista de mascotas, usa url_for correcta #}
+<a href="{{ url_for('routes.list_mascotas') }}" class="btn btn-secondary mt-3">Volver a Mis Mascotas</a>
+
+{% endblock %}

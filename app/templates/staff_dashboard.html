@@ -1,0 +1,82 @@
+{% extends "staff_base.html" %} {# Heredamos de la base de staff #}
+{% block content %}
+{# Mostrar nombre del usuario de staff logueado y su rol #}
+<h1>Bienvenido, {{ g.staff_user.nombre_completo or g.staff_user.username }} ({{ g.staff_user.rol }})</h1>
+<p>Este es tu panel de administración para el personal.</p>
+
+<h2>Funciones del Personal</h2>
+<div class="row">
+    {# Enlace para ver todas las consultas (Visible según roles) #}
+    {# La lógica de permisos @role_required ya está en la ruta, el enlace se mostrará si la ruta está accesible #}
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Gestionar Consultas</h5>
+                <p class="card-text">Ver, agendar y editar citas y detalles de consultas.</p>
+                {# Asegúrate de que staff_list_consultas exista en routes #}
+                <a href="{{ url_for('routes.staff_list_consultas') }}" class="btn btn-info">Ir a Consultas</a>
+            </div>
+        </div>
+    </div>
+
+    {# Puedes añadir tarjetas para otras funcionalidades según el rol #}
+
+    {# Tarjeta para Gestionar Veterinarios (Solo para Admin) #}
+     {% if g.staff_user and (g.staff_user.rol == 'admin') %}
+     <div class="col-md-4 mb-3">
+         <div class="card">
+             <div class="card-body">
+                 <h5 class="card-title">Gestionar Veterinarios</h5>
+                 <p class="card-text">Añadir, editar y eliminar perfiles y cuentas Staff de veterinarios.</p>
+                 <a href="{{ url_for('routes.staff_list_veterinarios') }}" class="btn btn-success">Ir a Veterinarios</a>
+             </div>
+         </div>
+     </div>
+     {% endif %}
+
+    {# --- TARJETA PARA GESTIONAR SERVICIOS --- #}
+    {# Visible solo para admin y recepcionista #}
+    {% if g.staff_user and (g.staff_user.rol in ['admin', 'recepcionista', 'veterinario']) %}
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Gestionar Servicios</h5>
+                <p class="card-text">Crear, editar y desactivar los servicios ofrecidos por la clínica.</p>
+                <a href="{{ url_for('routes.staff_list_servicios') }}" class="btn btn-secondary">Ir a Servicios</a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    {# --- Tarjeta para generar reportes --- #} 
+    {% if g.staff_user and g.staff_user.rol == 'admin' %}
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Reportes</h5>
+                <p class="card-text">Analiza los ingresos, servicios más populares y rendimiento de la clínica.</p>
+                <a href="{{ url_for('routes.staff_reportes_dashboard') }}" class="btn btn-dark">Ver Reportes</a>
+            </div>
+        </div>
+    </div>
+    {% endif %} 
+
+    {# Ejemplo: Ver Vets (Solo Admin) #}
+    {# {% if g.staff_user.rol == 'admin' %} #}
+    {# <div class="col-md-4 mb-3">
+        <div class="card"> ... Ver Veterinarios ... </div>
+    </div> #}
+    {# {% endif %} #}
+
+    {# Ejemplo: Ver Servicios (Admin/Recepcionista?) #}
+    {# <div class="col-md-4 mb-3">
+        <div class="card"> ... Ver Servicios ... </div>
+    </div> #}
+
+     {# Ejemplo: Ver Dueños y Mascotas (para buscar en la clínica) #}
+    {# <div class="col-md-4 mb-3">
+        <div class="card"> ... Ver Dueños/Mascotas ... </div>
+    </div> #}
+
+</div>
+{% endblock %}

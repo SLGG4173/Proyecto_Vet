@@ -1,0 +1,53 @@
+<!-- app/templates/reporte_ingresos_categoria.html -->
+{% extends "staff_base.html" %}
+{% block content %}
+<h1>{{ title }}</h1>
+
+<!-- Formulario de Filtros -->
+<div class="card my-4">
+    <div class="card-body">
+        <form method="POST" class="form-inline">
+            {{ form.hidden_tag() }}
+            <div class="form-group mr-3">
+                {{ form.mes_anio.label(class="mr-2") }}
+                {{ form.mes_anio(class="form-control") }}
+            </div>
+            {{ form.submit(class="btn btn-primary") }}
+        </form>
+    </div>
+</div>
+
+<!-- Resultados del Reporte -->
+{% if report_data %}
+<table class="table table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>Categoría de Servicio</th>
+            <th class="text-right">Ingreso Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for categoria, ingreso in report_data %}
+        <tr>
+            <td>{{ categoria }}</td>
+            <td class="text-right">${{ "%.2f"|format(ingreso) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr class="font-weight-bold">
+            <td class="text-right">Total General:</td>
+            <td class="text-right">${{ "%.2f"|format(total_ingresos) }}</td>
+        </tr>
+    </tfoot>
+</table>
+<!-- BOTÓN DE EXPORTACIÓN -->
+    <a href="{{ url_for('routes.exportar_reporte_ingresos_categoria', mes_anio=form.mes_anio.data.strftime('%Y-%m') if form.mes_anio.data else '') }}" 
+       class="btn btn-success mt-3">
+       <i class="fas fa-file-csv"></i> Exportar a CSV
+    </a>
+{% else %}
+<div class="alert alert-info">No se generaron ingresos en el período seleccionado.</div>
+{% endif %}
+<p class="mt-3"><a href="{{ url_for('routes.staff_reportes_dashboard') }}">Volver al Dashboard Reportes</a></p>
+{% endblock %}
